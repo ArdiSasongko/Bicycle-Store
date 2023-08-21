@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserType {
+  BUYER
+  ADMIN
+}
+
+enum MERK {
+  POLYGON
+  WIMCICLE
+  UNITED
+  FUJI
+  KONA
+}
+
+enum CATEGORY {
+  ROAD
+  MOUNTAIN
+  TOURING
+  FOLDING
+}
+
+model User {
+  id Int @id @default(autoincrement())
+  usertype UserType
+  name String
+  email String @unique
+  password String
+  location String
+  history History[]
+}
+
+model Bicycle {
+  id Int @id @default(autoincrement())
+  merk MERK
+  category CATEGORY
+  name String @unique
+  price Int
+  amount Int
+  history History[]
+}
+
+model History {
+  id Int @id @default(autoincrement())
+  id_user Int
+  user User @relation(fields: [id_user], references: [id])
+  id_bicycle Int
+  bicycle Bicycle @relation(fields: [id_bicycle], references: [id])
+  amount Int
+}
