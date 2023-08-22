@@ -68,3 +68,15 @@ export class editBicyleDto {
   @IsPositive()
   amount: number;
 }
+
+export class buyBicycleDto {
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  amount: number;
+
+  @IsNotEmpty()
+  @IsNumber()
+  @IsPositive()
+  price: number;
+}

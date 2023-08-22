@@ -14,6 +14,7 @@ import {
 } from './dtos/auth.dto';
 import { UserType } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
+import { Roles } from 'src/decorator/roles.decorator';
 
 @Controller('auth/:usertype')
 export class AuthController {
@@ -51,6 +52,7 @@ export class AuthController {
     return this.authService.signIn(body, usertype);
   }
 
+  @Roles(UserType.ADMIN)
   @Post('productKey')
   productKey(@Body() { email, usertype }: generatedTokenDto) {
     return this.authService.generatedProductKey(email, usertype);

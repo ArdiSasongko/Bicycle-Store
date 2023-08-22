@@ -56,5 +56,7 @@ model History {
   user User @relation(fields: [id_user], references: [id])
   id_bicycle Int
   bicycle Bicycle @relation(fields: [id_bicycle], references: [id])
+  date DateTime @default(now())
   amount Int
+  total_price Int
 }

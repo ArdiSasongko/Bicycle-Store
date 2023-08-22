@@ -1,6 +1,7 @@
 import {
   ConflictException,
   HttpException,
+  HttpStatus,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -32,6 +33,11 @@ interface editBicycle {
   name?: string;
   price?: number;
   amount?: number;
+}
+
+interface buyBicycle {
+  amount: number;
+  price: number;
 }
 
 const bicycleSelect = {
@@ -145,5 +151,53 @@ export class BicycleService {
     });
 
     return new HttpException(`Success Deleted ${findBicycle.name}`, 204);
+  }
+
+  async buyBicycle({ amount, price }: buyBicycle, user_id: number, id: number) {
+    const bicycle = await this.prismaService.bicycle.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!bicycle) {
+      throw new NotFoundException();
+    }
+
+    if (amount > bicycle.amount) {
+      throw new HttpException(
+        `goods out of stock, remaining stock ${bicycle.amount}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const total_price = bicycle.price * amount;
+
+    if (price < total_price) {
+      throw new HttpException(
+        `Money not enough, total ${total_price}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const newAmount = bicycle.amount - amount;
+
+    const newBicycle = await this.prismaService.bicycle.update({
+      where: {
+        id,
+      },
+      data: { amount: newAmount },
+    });
+
+    const newBuyer = await this.prismaService.history.create({
+      data: {
+        id_user: user_id,
+        id_bicycle: id,
+        amount: amount,
+        total_price: total_price,
+      },
+    });
+
+    throw new HttpException(`Success Buy ${bicycle.name}`, 201);
   }
 }

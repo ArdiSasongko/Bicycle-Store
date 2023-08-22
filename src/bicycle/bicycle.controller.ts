@@ -9,12 +9,15 @@ import {
   Delete,
 } from '@nestjs/common';
 import { BicycleService } from './bicycle.service';
-import { CATEGORY, MERK } from '@prisma/client';
+import { CATEGORY, MERK, UserType } from '@prisma/client';
 import {
   ResponseBicycleDto,
   addBicycleDto,
+  buyBicycleDto,
   editBicyleDto,
 } from './dtos/bicycle.dto';
+import { User, userInfo } from 'src/decorator/user.decorator';
+import { Roles } from 'src/decorator/roles.decorator';
 
 @Controller('bicycle')
 export class BicycleController {
@@ -51,18 +54,31 @@ export class BicycleController {
     return this.bicycleService.getBicycle(id);
   }
 
+  @Roles(UserType.ADMIN)
   @Post()
   addBicycle(@Body() body: addBicycleDto) {
     return this.bicycleService.addBicycle(body);
   }
 
+  @Roles(UserType.ADMIN)
   @Put(':id')
   editBicycle(@Body() body: editBicyleDto, @Param('id') id: number) {
     return this.bicycleService.editBicycle(id, body);
   }
 
+  @Roles(UserType.ADMIN)
   @Delete(':id')
   deleteBicycle(@Param('id') id: number) {
     return this.bicycleService.deleteBicyle(id);
+  }
+
+  @Roles(UserType.ADMIN, UserType.BUYER)
+  @Post(':id/buy')
+  buyBicycle(
+    @Body() body: buyBicycleDto,
+    @User() user: userInfo,
+    @Param('id') id: number,
+  ) {
+    return this.bicycleService.buyBicycle(body, user.id, id);
   }
 }
